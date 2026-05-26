@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL Hierarchical Turntable</title>
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 a_position;
+        attribute vec3 a_normal;
+        uniform mat4 u_worldViewProjection;
+        uniform mat4 u_worldInverseTranspose;
+        varying vec3 v_normal;
+        
+        void main() {
+            gl_Position = u_worldViewProjection * a_position;
+            v_normal = mat3(u_worldInverseTranspose) * a_normal;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec3 v_normal;
+        uniform vec4 u_color;
+        uniform vec3 u_lightDirection;
+
+        void main() {
+            vec3 normal = normalize(v_normal);
+            float light = max(dot(normal, u_lightDirection), 0.3);
+            gl_FragColor = vec4(u_color.rgb * light, u_color.a);
+        }
+    </script>
+
+    <script type="text/javascript" src="../src/common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../src/common/initShaders.js"></script>
+    <script type="text/javascript" src="../src/common/MV.js"></script>
+</head>
+<body>
+    <canvas id="glcanvas"></canvas>
+    <script type="module" src="../src/main.js"></script>
+</body>
+</html>
