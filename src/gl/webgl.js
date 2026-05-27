@@ -38,8 +38,7 @@ export function initWebGL(canvas) {
 
     // Set light direction
     gl.uniform3fv(uniforms.lightDir, [0.3, 1.0, 0.6]);
-    console.log('position attrib:', gl.getAttribLocation(program, 'a_position'));
-    console.log('normal attrib:', gl.getAttribLocation(program, 'a_normal'));
+
 }
 
 export function createBufferInfo(data) {
