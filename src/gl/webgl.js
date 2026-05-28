@@ -3,7 +3,7 @@
  * Handles shader compilation, program creation, buffer management, and drawing
  */
 
-import { createCube, createCylinder } from '../geometry/premitives.js';
+import { createCube, createCylinder, createHollowCylinder, createRoundedBox } from '../geometry/premitives.js';
 
 // WebGL context and program
 let gl;
@@ -12,6 +12,9 @@ let attribs;
 let uniforms;
 let cubeBuffer;
 let cylinderBuffer;
+let hollowCylinderBuffer;
+let husksBuffer;
+let roundedCubeBuffer;
 
 export function initWebGL(canvas) {
     gl = canvas.getContext('webgl');
@@ -35,6 +38,10 @@ export function initWebGL(canvas) {
     // Create geometry buffers
     cubeBuffer = createBufferInfo(createCube());
     cylinderBuffer = createBufferInfo(createCylinder(36));
+    hollowCylinderBuffer = createBufferInfo(createHollowCylinder(36, 0.03, 1, 1));
+    husksBuffer = createBufferInfo(createHollowCylinder(7, 0.2, 1, 1));
+    roundedCubeBuffer = createBufferInfo(createRoundedBox(2, 2, 2, 0.1, 10));
+    // width, height, depth, radius, segments
 
     // Set light direction
     gl.uniform3fv(uniforms.lightDir, [0.3, 1.0, 0.6]);
@@ -83,13 +90,5 @@ export function getGLContext() {
 }
 
 export function getBuffers() {
-    return { cubeBuffer, cylinderBuffer };
-}
-
-export function getCubeBuffer() {
-    return cubeBuffer;
-}
-
-export function getCylinderBuffer() {
-    return cylinderBuffer;
+    return { cubeBuffer, cylinderBuffer, hollowCylinderBuffer, husksBuffer, roundedCubeBuffer };
 }

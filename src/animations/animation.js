@@ -116,8 +116,8 @@ export function updateAnimation(dt) {
     else if (animState === 2) { 
         armPanAngle -= dt * 0.25; 
         cartridgeAngle -= dt * 0.1; 
-        if (armPanAngle <= -0.65) {
-            armPanAngle = -0.65;
+        if (armPanAngle <= -0.5) {
+            armPanAngle = -0.5;
             animState = 3;
         }
     } 
@@ -179,8 +179,8 @@ export function updateAnimation(dt) {
     }
     else if (animState === 11) {
         recordLiftY -= dt * 1.5;
-        if (recordLiftY <= 0) {
-            recordLiftY = 0;
+        if (recordLiftY <= -0.1) {
+            recordLiftY = -0.1;
             if (pendingStart) {
                 pendingStart = false;
                 animState = 1;
