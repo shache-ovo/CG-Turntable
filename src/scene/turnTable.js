@@ -13,7 +13,6 @@ let viewProjMatrix = mat4();
 
 const deg = (radians) => radians * 180 / Math.PI;
 
-
 // Colors
 const colorBase = [165/255, 196/255, 242/255, 1.0];
 const colorWood = [199/255, 150/255, 109/255, 1.0];
@@ -23,8 +22,8 @@ const colorLabel = [0.95, 0.45, 0.45, 1.0];
 const colorArm = [0.85, 0.85, 0.85, 1.0];
 const colorCartridge = [0.95, 0.35, 0.35, 1.0];
 
+
 function pushMatrix() { 
-    // Deep copy the matrix by creating a new matrix with the same values
     let copy = [];
     for (let i = 0; i < modelMatrix.length; i++) {
         copy.push(modelMatrix[i].slice());
@@ -80,23 +79,27 @@ export function renderScene(gl, canvas) {
                 modelMatrix = mult(modelMatrix, scalem(2.5, 0.2, 2.5));
                 drawShape(getCylinderBuffer(), colorPlatter, modelMatrix, viewProjMatrix);
             popMatrix();
-            
-            pushMatrix();
-                modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().recordAngle)));
-                
-                pushMatrix();
-                    modelMatrix = mult(modelMatrix, translate(0, 0.45, 0));
-                    modelMatrix = mult(modelMatrix, scalem(3.5, 0.05, 3.5));
-                    drawShape(getCylinderBuffer(), colorRecord, modelMatrix, viewProjMatrix);
-                popMatrix();
 
+            
+            if (getAnimationState().hasRecord) {
                 pushMatrix();
-                    modelMatrix = mult(modelMatrix, translate(0, 0.51, 0));
-                    modelMatrix = mult(modelMatrix, scalem(0.8, 0.01, 0.8));
-                    drawShape(getCylinderBuffer(), colorLabel, modelMatrix, viewProjMatrix);
+                    modelMatrix = mult(modelMatrix, translate(getAnimationState().recordSwapX, getAnimationState().recordLiftY, 0));
+                    modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().recordAngle)));
+                    
+                    pushMatrix();
+                        modelMatrix = mult(modelMatrix, translate(0, 0.45, 0));
+                        modelMatrix = mult(modelMatrix, scalem(3.5, 0.05, 3.5));
+                        drawShape(getCylinderBuffer(), colorRecord, modelMatrix, viewProjMatrix);
+                    popMatrix();
+                        
+                    pushMatrix();
+                        modelMatrix = mult(modelMatrix, translate(0, 0.51, 0));
+                        modelMatrix = mult(modelMatrix, scalem(0.8, 0.01, 0.8));
+                        drawShape(getCylinderBuffer(), getAnimationState().colorLabels[getAnimationState().currentRecord], modelMatrix, viewProjMatrix);
+                    popMatrix();
                 popMatrix();
-            popMatrix();
-        popMatrix(); 
+            }
+        popMatrix();
 
         // --------------------------------------------------
         // HIERARCHY LEVEL 2: TONEARM MECHANISM 
@@ -168,8 +171,25 @@ export function renderScene(gl, canvas) {
                         modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().buttonAngle * (i+1) * 0.5)));
                     }
 
-                    modelMatrix = mult(modelMatrix, scalem(0.2, 0.2, 0.2));
-                    drawShape(getCylinderBuffer(), colorCartridge, modelMatrix, viewProjMatrix);
+                    pushMatrix();
+                        modelMatrix = mult(modelMatrix, scalem(0.2, 0.2, 0.2));
+                        drawShape(getCylinderBuffer(), colorCartridge, modelMatrix, viewProjMatrix);
+                    popMatrix();
+
+                    modelMatrix = mult(modelMatrix, rotateX(deg(-Math.PI/2)));
+
+                    for (let n = 0; n < 12; n++) {
+                        const angle = (n / 12) * Math.PI * 2;
+                        const cx = Math.cos(angle) * 0.22;
+                        const cy = Math.sin(angle) * 0.22;
+
+                        pushMatrix();
+                            modelMatrix = mult(modelMatrix, translate(cx, cy, 0));
+                            modelMatrix = mult(modelMatrix, rotateZ(deg(angle)));
+                            modelMatrix = mult(modelMatrix, scalem(0.04, 0.06, 0.18));
+                            drawShape(getCubeBuffer(), colorCartridge, modelMatrix, viewProjMatrix);
+                        popMatrix();
+                    }
                 popMatrix();
             }
         popMatrix();

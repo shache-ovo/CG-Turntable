@@ -6,6 +6,7 @@
 import { initWebGL, getGLContext, getBuffers } from './gl/webgl.js';
 import { renderScene } from './scene/turnTable.js';
 import { updateAnimation, getLastTime, setLastTime } from './animations/animation.js';
+import { initAudio } from './audio/audio.js';
 
 const canvas = document.getElementById('glcanvas');
 
@@ -16,6 +17,7 @@ window.onload = function() {
 
     // Initialize WebGL
     initWebGL(canvas);
+    initAudio();
     const { cubeBuffer, cylinderBuffer } = getBuffers();
 
     // Handle window resize
