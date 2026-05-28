@@ -15,6 +15,19 @@ let lastTime = 0;
 
 let onPlaybackStart = null;
 
+let hasRecord = false;
+let pendingSwap = false;
+let pendingStart = false;
+let recordLiftY = 0;
+let recordSwapX = 0;
+let currentRecord = 0;
+
+const colorLabels = [
+    [0.95, 0.45, 0.45, 1.0],
+    [0.75, 0.7, 0.5, 1.0],
+    [0.6, 0.4, 0.75, 1.0],
+];
+
 export function setOnPlaybackStart(fn) {
     onPlaybackStart = fn;
 }
@@ -26,21 +39,67 @@ export function getAnimationState() {
         armPanAngle,
         cartridgeAngle,
         recordAngle,
-        buttonAngle
+        buttonAngle,
+        hasRecord,
+        recordLiftY,
+        recordSwapX,
+        currentRecord,
+        colorLabels,
     };
 }
 
 export function startTurntable() {
-    if (animState === 0) {
+    if (!hasRecord) return false;
+
+    if (animState === 0 || animState === 6 || animState === 7) {
         animState = 1;
-    } else if (animState === 6) {
-        animState = 1;
+        pendingStart = false;
+        return true;
     }
+    else if (animState >= 8 && animState <= 11) {
+        pendingStart = true;
+        return true;
+    }
+
+    return false;
 }
 
 export function stopTurntable() {
-    if (animState === 4) {
+    pendingStart = false;
+
+    if (animState >= 1 && animState <= 4) {
         animState = 5;
+        return true;
+    }
+    else if (animState >= 8 && animState <= 11) {
+        return true;
+    }
+
+    return false;
+}
+
+export function isPlaybackRequested() {
+    return getIsPlaying() || pendingStart;
+}
+
+export function loadRecord() {
+    if (!hasRecord) {
+        hasRecord = true;
+        currentRecord = currentRecord % colorLabels.length;
+        recordSwapX = -5.0;
+        animState = 10;
+        return;
+    }
+
+    if (animState === 0 || animState === 7) {
+        animState = 8;
+    }
+    else if (animState === 4) {
+        animState = 5;
+        pendingSwap = true;
+    }
+    else if (animState === 5 || animState === 6) {
+        pendingSwap = true;
     }
 }
 
@@ -90,13 +149,46 @@ export function updateAnimation(dt) {
             animState = 7;
         }
     }
-    else if (animState === 7) { 
-        armTiltAngle += dt * 0.15; 
+    else if (animState === 7) {
+        armTiltAngle += dt * 0.15;
         if (armTiltAngle >= 0) {
             armTiltAngle = 0;
-            animState = 7;
+            if (pendingSwap) {
+                pendingSwap = false;
+                animState = 8;
+            }
         }
-    } 
+    }
+
+    else if (animState === 8) {
+        recordLiftY += dt * 1.5;
+        if (recordLiftY >= 2.0) { recordLiftY = 2.0; animState = 9; }
+    }
+    else if (animState === 9) {
+        recordSwapX += dt * 3.0;
+        if (recordSwapX >= 4.0) {
+            recordSwapX = 4.0;
+            currentRecord = (currentRecord + 1) % colorLabels.length;
+            recordSwapX = -4.0;
+            animState = 10;
+        }
+    }
+    else if (animState === 10) {
+        recordSwapX += dt * 3.0;
+        if (recordSwapX >= 0) { recordSwapX = 0; animState = 11; }
+    }
+    else if (animState === 11) {
+        recordLiftY -= dt * 1.5;
+        if (recordLiftY <= 0) {
+            recordLiftY = 0;
+            if (pendingStart) {
+                pendingStart = false;
+                animState = 1;
+            } else {
+                animState = 0;
+            }
+        }
+    }
 }
 
 export function getLastTime() {

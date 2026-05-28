@@ -41,14 +41,16 @@
     <canvas id="glcanvas"></canvas>
 
     <div id="audio-hint">
-        🎵 <label for="audio-file">MP3 / WAV 불러오기</label>
+        <label for="audio-file">🎵</label>
         <input type="file" id="audio-file" accept="audio/*">
         <span id="audio-status">파일 없음</span>
     </div>
     <div id="hud">
         <button class="hud-button" id="button-play" title="재생 / 정지">▶</button>
+        <button class="hud-button" id="button-swap" title="LP 교체">💿</button>
     </div>
 
     <script type="module" src="../src/main.js"></script>
+    <script type="module" src="../src/scene/control.js"></script>
 </body>
 </html>

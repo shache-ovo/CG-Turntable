@@ -22,6 +22,7 @@ const colorLabel = [0.95, 0.45, 0.45, 1.0];
 const colorArm = [0.85, 0.85, 0.85, 1.0];
 const colorCartridge = [0.95, 0.35, 0.35, 1.0];
 
+
 function pushMatrix() { 
     let copy = [];
     for (let i = 0; i < modelMatrix.length; i++) {
@@ -78,23 +79,27 @@ export function renderScene(gl, canvas) {
                 modelMatrix = mult(modelMatrix, scalem(2.5, 0.2, 2.5));
                 drawShape(getCylinderBuffer(), colorPlatter, modelMatrix, viewProjMatrix);
             popMatrix();
-            
-            pushMatrix();
-                modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().recordAngle)));
-                
-                pushMatrix();
-                    modelMatrix = mult(modelMatrix, translate(0, 0.45, 0));
-                    modelMatrix = mult(modelMatrix, scalem(3.5, 0.05, 3.5));
-                    drawShape(getCylinderBuffer(), colorRecord, modelMatrix, viewProjMatrix);
-                popMatrix();
 
+            
+            if (getAnimationState().hasRecord) {
                 pushMatrix();
-                    modelMatrix = mult(modelMatrix, translate(0, 0.51, 0));
-                    modelMatrix = mult(modelMatrix, scalem(0.8, 0.01, 0.8));
-                    drawShape(getCylinderBuffer(), colorLabel, modelMatrix, viewProjMatrix);
+                    modelMatrix = mult(modelMatrix, translate(getAnimationState().recordSwapX, getAnimationState().recordLiftY, 0));
+                    modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().recordAngle)));
+                    
+                    pushMatrix();
+                        modelMatrix = mult(modelMatrix, translate(0, 0.45, 0));
+                        modelMatrix = mult(modelMatrix, scalem(3.5, 0.05, 3.5));
+                        drawShape(getCylinderBuffer(), colorRecord, modelMatrix, viewProjMatrix);
+                    popMatrix();
+                        
+                    pushMatrix();
+                        modelMatrix = mult(modelMatrix, translate(0, 0.51, 0));
+                        modelMatrix = mult(modelMatrix, scalem(0.8, 0.01, 0.8));
+                        drawShape(getCylinderBuffer(), getAnimationState().colorLabels[getAnimationState().currentRecord], modelMatrix, viewProjMatrix);
+                    popMatrix();
                 popMatrix();
-            popMatrix();
-        popMatrix(); 
+            }
+        popMatrix();
 
         // --------------------------------------------------
         // HIERARCHY LEVEL 2: TONEARM MECHANISM 

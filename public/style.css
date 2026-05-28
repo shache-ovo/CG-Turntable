@@ -54,6 +54,12 @@ canvas {
   background: #555;
   box-shadow: none;
 }
+#button-swap {
+  background: #46cf6f;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(58, 170, 92, 0.45);
+  font-size: 20px;
+}
 
 #audio-hint {
   position: fixed;
@@ -68,18 +74,15 @@ canvas {
   font-size: 13px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   z-index: 10;
 }
 #audio-hint label {
   cursor: pointer;
-  color: #7bc8ff;
-  text-decoration: underline;
 }
 #audio-file {
   display: none;
 }
 #audio-status {
   color: rgba(255, 255, 255, 0.4);
-  font-size: 11px;
 }

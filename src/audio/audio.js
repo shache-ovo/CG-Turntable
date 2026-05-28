@@ -18,7 +18,10 @@ export function initAudio() {
 export function loadAudio(url) {
   return fetch(url)
     .then((res) => res.arrayBuffer())
-    .then((buf) => audioCtx.decodeAudioData(buf))
+    .then((buf) => {
+       if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx.decodeAudioData(buf);
+    })
     .then((decoded) => {
       audioBuffer = decoded;
       pausedAt = 0;
