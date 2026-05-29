@@ -3,9 +3,8 @@
  * Handles scene hierarchy, matrix stack, and rendering of the turntable scene
  */
 
-import { drawShape } from '../gl/webgl.js';
+import { drawShape, getBuffers, setCameraPosition } from '../gl/webgl.js';
 import { getAnimationState } from '../animations/animation.js';
-import { getBuffers } from '../gl/webgl.js';
 
 let matrixStack = [];
 let modelMatrix = mat4();
@@ -17,12 +16,15 @@ const deg = (radians) => radians * 180 / Math.PI;
 const colorBase = [165/255, 196/255, 242/255, 1.0];
 const colorWood = [199/255, 150/255, 109/255, 1.0];
 const colorPlatter = [78/255, 132/255, 212/255, 1.0];
-const colorRecord = [0.2, 0.2, 0.2, 1.0];
+const colorRecord = [0.12, 0.12, 0.14, 1.0];
 const colorLabel = [0.95, 0.45, 0.45, 1.0];
-const colorArm = [0.85, 0.85, 0.85, 1.0];
+const colorArm = [0.9, 0.9, 0.9, 1.0];
 const colorCartridge = [0.95, 0.35, 0.35, 1.0];
 const colorRecordInner = [0.9, 0.9, 0.9, 1.0];
 
+const matWood = { shininess: 10.0, specular: 0.1, ambient: 0.15};
+const matRecord = { shininess: 6.0, specular: 0.4, anisotropic: 0.9 };
+const matMetal = { shininess: 20.0, specular: 0.6, ambient: 0.23, metallic: 0.9 };
 
 function pushMatrix() { 
     let copy = [];
@@ -50,6 +52,10 @@ export function renderScene(gl, canvas) {
     view = mult(view, translate(0, 0, -15.0)); 
     view = mult(view, rotateX(deg(0.5))); 
     view = mult(view, rotateY(deg(0))); 
+
+    let invView = inverse(view);
+    setCameraPosition([invView[0][3], invView[1][3], invView[2][3]]);
+
     viewProjMatrix = mult(projection, view);
     
     modelMatrix = mat4();
@@ -66,7 +72,7 @@ export function renderScene(gl, canvas) {
         pushMatrix();
             modelMatrix = mult(modelMatrix, translate(0, -0.9, 0));
             modelMatrix = mult(modelMatrix, scalem(5.5, 0.1, 4.4));
-            drawShape(getBuffers().roundedCubeBuffer, colorWood, modelMatrix, viewProjMatrix);
+            drawShape(getBuffers().roundedCubeBuffer, colorWood, modelMatrix, viewProjMatrix, matWood);
         popMatrix();
 
         // --------------------------------------------------
@@ -96,7 +102,7 @@ export function renderScene(gl, canvas) {
                     pushMatrix();
                         modelMatrix = mult(modelMatrix, translate(0, 0.45, 0));
                         modelMatrix = mult(modelMatrix, scalem(3.5, 0.05, 3.5));
-                        drawShape(getBuffers().cylinderBuffer, colorRecord, modelMatrix, viewProjMatrix);
+                        drawShape(getBuffers().cylinderBuffer, colorRecord, modelMatrix, viewProjMatrix, matRecord);
                     popMatrix();
                         
                     pushMatrix();
@@ -108,7 +114,7 @@ export function renderScene(gl, canvas) {
                     pushMatrix();
                         modelMatrix = mult(modelMatrix, translate(0, 0.52, 0));
                         modelMatrix = mult(modelMatrix, scalem(0.07, 0.01, 0.07));
-                        drawShape(getBuffers().cylinderBuffer, colorRecordInner, modelMatrix, viewProjMatrix);
+                        drawShape(getBuffers().cylinderBuffer, colorRecordInner, modelMatrix, viewProjMatrix, matRecord);
                     popMatrix();
                 popMatrix();
             }
@@ -124,7 +130,7 @@ export function renderScene(gl, canvas) {
             pushMatrix();
                 modelMatrix = mult(modelMatrix, translate(0, 0.2, 0));
                 modelMatrix = mult(modelMatrix, scalem(0.6, 0.2, 0.6));
-                drawShape(getBuffers().cylinderBuffer, colorArm, modelMatrix, viewProjMatrix);
+                drawShape(getBuffers().cylinderBuffer, colorArm, modelMatrix, viewProjMatrix, matMetal);
             popMatrix();
 
             // HIERARCHY LEVEL 3: TONEARM PIVOT
@@ -142,8 +148,9 @@ export function renderScene(gl, canvas) {
 
             pushMatrix();
                 modelMatrix = mult(modelMatrix, translate(0, -0.15, 1.9));
-                modelMatrix = mult(modelMatrix, scalem(0.1, 0.1, 1.6));
-                drawShape(getBuffers().cubeBuffer, colorArm, modelMatrix, viewProjMatrix);
+                modelMatrix = mult(modelMatrix, rotateX(90));
+                modelMatrix = mult(modelMatrix, scalem(0.13, 1.6, 0.13));
+                drawShape(getBuffers().cylinderBuffer, colorArm, modelMatrix, viewProjMatrix, matMetal);
             popMatrix();
 
             // --------------------------------------------------
