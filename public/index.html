@@ -12,24 +12,82 @@
         attribute vec3 a_normal;
         uniform mat4 u_worldViewProjection;
         uniform mat4 u_worldInverseTranspose;
+        uniform mat4 u_world;
         varying vec3 v_normal;
+        varying vec3 v_worldPos;
         
         void main() {
             gl_Position = u_worldViewProjection * a_position;
             v_normal = mat3(u_worldInverseTranspose) * a_normal;
+            v_worldPos = (u_world * a_position).xyz;
         }
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
         precision mediump float;
         varying vec3 v_normal;
+        varying vec3 v_worldPos;
         uniform vec4 u_color;
         uniform vec3 u_lightDirection;
+        uniform vec3 u_lightDirection2;
+        uniform vec3 u_lightDirection3;
+        uniform vec3 u_viewPosition;
+        uniform vec3 u_objectCenter;
+        uniform float u_shininess;
+        uniform float u_ambient;
+        uniform float u_specular;
+        uniform float u_metallic;
+        uniform float u_anisotropic;
+
+        vec3 calcSpecColor(vec3 baseColor, float metallic) {
+            return mix(vec3(1.0), baseColor, metallic);
+        }
+
+        float calcAnisotropicSpec(vec3 normal, vec3 lightDir, vec3 viewDir, float shininess) {
+            vec3 toCenter = normalize(vec3(
+                v_worldPos.x - u_objectCenter.x,
+                0.0,
+                v_worldPos.z - u_objectCenter.z
+            ));
+            vec3 tangent = normalize(cross(normal, toCenter));
+            float TdotL = dot(tangent, lightDir);
+            float TdotV = dot(tangent, viewDir);
+            float sinTL = sqrt(max(1.0 - TdotL * TdotL, 0.0));
+            float sinTV = sqrt(max(1.0 - TdotV * TdotV, 0.0));
+            return pow(max(sinTL * sinTV - TdotL * TdotV, 0.0), shininess);
+        }
+
+        float calcSpec(vec3 normal, vec3 lightDir, vec3 viewDir, float shininess) {
+            vec3 halfDir = normalize(lightDir + viewDir);
+            float isoSpec = pow(max(dot(normal, halfDir), 0.0), shininess * 2.0);
+            if (u_anisotropic > 0.0) {
+                float anisoSpec = calcAnisotropicSpec(normal, lightDir, viewDir, shininess);
+                return mix(isoSpec, anisoSpec, u_anisotropic);
+            }
+            return isoSpec;
+        }
 
         void main() {
             vec3 normal = normalize(v_normal);
-            float light = max(dot(normal, u_lightDirection), 0.3);
-            gl_FragColor = vec4(u_color.rgb * light, u_color.a);
+            vec3 viewDir = normalize(u_viewPosition - v_worldPos);
+            vec3 light1 = normalize(u_lightDirection);
+            vec3 light2 = normalize(u_lightDirection2);
+            vec3 light3 = normalize(u_lightDirection3);
+            vec3 specColor = calcSpecColor(u_color.rgb, u_metallic);
+
+            // diffuse: light1 메인, light2 보조
+            float diff1 = max(dot(normal, light1), 0.0);
+            float diff2 = max(dot(normal, light2), 0.0);
+            vec3 diffuse = u_color.rgb * (diff1 * 0.5 + diff2 * 0.6 + u_ambient);
+
+            // specular: light1 메인
+            vec3 specular = specColor * calcSpec(normal, light1, viewDir, u_shininess) * u_specular;
+
+            // rim: light3, 금속에만 강하게
+            float rimSpec = calcSpec(normal, light3, viewDir, u_shininess * 0.5);
+            vec3 rim = specColor * rimSpec * u_specular * u_metallic * 1.5;
+
+            gl_FragColor = vec4(diffuse + specular + rim, u_color.a);
         }
     </script>
 

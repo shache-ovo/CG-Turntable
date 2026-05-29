@@ -3,7 +3,7 @@
  * Handles shader compilation, program creation, buffer management, and drawing
  */
 
-import { createCube, createCylinder } from '../geometry/premitives.js';
+import { createCube, createCylinder, createHollowCylinder, createRoundedBox } from '../geometry/premitives.js';
 
 // WebGL context and program
 let gl;
@@ -12,6 +12,9 @@ let attribs;
 let uniforms;
 let cubeBuffer;
 let cylinderBuffer;
+let hollowCylinderBuffer;
+let husksBuffer;
+let roundedCubeBuffer;
 
 export function initWebGL(canvas) {
     gl = canvas.getContext('webgl');
@@ -27,18 +30,36 @@ export function initWebGL(canvas) {
     
     uniforms = {
         matrix: gl.getUniformLocation(program, 'u_worldViewProjection'),
+        world: gl.getUniformLocation(program, 'u_world'),
         worldInvTrans: gl.getUniformLocation(program, 'u_worldInverseTranspose'),
         color: gl.getUniformLocation(program, 'u_color'),
-        lightDir: gl.getUniformLocation(program, 'u_lightDirection')
+        lightDir: gl.getUniformLocation(program, 'u_lightDirection'),
+        lightDir2: gl.getUniformLocation(program, 'u_lightDirection2'),
+        lightDir3: gl.getUniformLocation(program, 'u_lightDirection3'),
+        viewPosition: gl.getUniformLocation(program, 'u_viewPosition'),
+        shininess: gl.getUniformLocation(program, 'u_shininess'),
+        ambient: gl.getUniformLocation(program, 'u_ambient'),
+        specular: gl.getUniformLocation(program, 'u_specular'),
+        metallic: gl.getUniformLocation(program, 'u_metallic'),
+        anisotropic: gl.getUniformLocation(program, 'u_anisotropic'),
+        objectCenter: gl.getUniformLocation(program, 'u_objectCenter'),
     };
 
     // Create geometry buffers
     cubeBuffer = createBufferInfo(createCube());
     cylinderBuffer = createBufferInfo(createCylinder(36));
+    hollowCylinderBuffer = createBufferInfo(createHollowCylinder(36, 0.03, 1, 1));
+    husksBuffer = createBufferInfo(createHollowCylinder(7, 0.2, 1, 1));
+    roundedCubeBuffer = createBufferInfo(createRoundedBox(2, 2, 2, 0.1, 10));
 
-    // Set light direction
-    gl.uniform3fv(uniforms.lightDir, [0.3, 1.0, 0.6]);
+    gl.uniform3fv(uniforms.lightDir, [1.0, 0.3, 0.5]);
+    gl.uniform3fv(uniforms.lightDir2, [-0.5, 0.8, -0.3]);
+    // gl.uniform3fv(uniforms.lightDir3, [-0.3, -0.2, -1.0]);
+    gl.uniform3fv(uniforms.lightDir3, [-0.5, -0.4, 0.4]);
+}
 
+export function setCameraPosition(pos) {
+    gl.uniform3fv(uniforms.viewPosition, pos);
 }
 
 export function createBufferInfo(data) {
@@ -57,7 +78,7 @@ export function createBufferInfo(data) {
     return { pos: posBuffer, norm: normBuffer, idx: idxBuffer, count: data.indices.length };
 }
 
-export function drawShape(bufferInfo, color, modelMatrix, viewProjMatrix) {
+export function drawShape(bufferInfo, color, modelMatrix, viewProjMatrix, material = {}) {
     gl.bindBuffer(gl.ARRAY_BUFFER, bufferInfo.pos);
     gl.enableVertexAttribArray(attribs.position);
     gl.vertexAttribPointer(attribs.position, 3, gl.FLOAT, false, 0, 0);
@@ -72,9 +93,20 @@ export function drawShape(bufferInfo, color, modelMatrix, viewProjMatrix) {
     let invTrans = transpose(inverse(modelMatrix));
 
     gl.uniformMatrix4fv(uniforms.matrix, false, flatten(wvp));
+    gl.uniformMatrix4fv(uniforms.world, false, flatten(modelMatrix));
     gl.uniformMatrix4fv(uniforms.worldInvTrans, false, flatten(invTrans));
     gl.uniform4fv(uniforms.color, color);
-    
+
+    gl.uniform1f(uniforms.shininess, material.shininess ?? 32.0);
+    gl.uniform1f(uniforms.specular, material.specular ?? 1.0);
+    gl.uniform1f(uniforms.metallic, material.metallic ?? 0.0);
+    gl.uniform1f(uniforms.anisotropic, material.anisotropic ?? 0.0);
+    gl.uniform1f(uniforms.ambient, material.ambient ?? 0.3);
+    let cx = modelMatrix[0][3];
+    let cy = modelMatrix[1][3];
+    let cz = modelMatrix[2][3];
+    gl.uniform3fv(uniforms.objectCenter, [cx, cy, cz]);
+
     gl.drawElements(gl.TRIANGLES, bufferInfo.count, gl.UNSIGNED_SHORT, 0);
 }
 
@@ -83,13 +115,5 @@ export function getGLContext() {
 }
 
 export function getBuffers() {
-    return { cubeBuffer, cylinderBuffer };
-}
-
-export function getCubeBuffer() {
-    return cubeBuffer;
-}
-
-export function getCylinderBuffer() {
-    return cylinderBuffer;
+    return { cubeBuffer, cylinderBuffer, hollowCylinderBuffer, husksBuffer, roundedCubeBuffer };
 }
