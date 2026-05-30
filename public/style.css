@@ -61,6 +61,28 @@ canvas {
   font-size: 20px;
 }
 
+#vol-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-family: monospace;
+}
+#vol-slider {
+  width: 90px;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+#vol-label {
+  width: 28px;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+}
+
 #audio-hint {
   position: fixed;
   top: 20px;

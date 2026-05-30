@@ -41,7 +41,7 @@ function popMatrix() {
     }
 }
 
-export function renderScene(gl, canvas) {
+export function renderScene(gl, canvas, camera) {
     gl.clearColor(0.8, 0.8, 0.8, 1.0); 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
@@ -49,13 +49,11 @@ export function renderScene(gl, canvas) {
     let projection = perspective(deg(Math.PI/3), aspect, 0.1, 100); 
     
     let view = mat4();
-    view = mult(view, translate(0, 0, -15.0)); 
-    view = mult(view, rotateX(deg(0.5))); 
-    view = mult(view, rotateY(deg(0))); 
+    view = mult(view, translate(0, 0, -camera.radius)); 
+    view = mult(view, rotateX(deg(-camera.phi))); 
+    view = mult(view, rotateY(deg(-camera.theta))); 
 
-    // let invView = inverse(view);
-    // setCameraPosition([invView[3][0], invView[3][1], invView[3][2]]);
-    setCameraPosition([0, 0, 15.0]);
+    setCameraPosition([0, 0, camera.radius]);
 
     viewProjMatrix = mult(projection, view);
     
@@ -88,18 +86,19 @@ export function renderScene(gl, canvas) {
                 drawShape(getBuffers().cylinderBuffer, colorArm, modelMatrix, viewProjMatrix);
             popMatrix();
 
-            modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().recordAngle)));
-
             pushMatrix();
-                modelMatrix = mult(modelMatrix, translate(0, 0.1, 0));
-                modelMatrix = mult(modelMatrix, scalem(3.65, 0.07, 3.65));
-                drawShape(getBuffers().cylinderBuffer, colorPlatter, modelMatrix, viewProjMatrix);
-            popMatrix();
-
-            pushMatrix();
-                modelMatrix = mult(modelMatrix, translate(0, 0.27, 0));
-                modelMatrix = mult(modelMatrix, scalem(3.65, 0.2, 3.65));
-                drawShape(getBuffers().hollowCylinderBuffer, colorPlatter, modelMatrix, viewProjMatrix);
+                modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().recordAngle)));
+                pushMatrix();
+                    modelMatrix = mult(modelMatrix, translate(0, 0.1, 0));
+                    modelMatrix = mult(modelMatrix, scalem(3.65, 0.07, 3.65));
+                    drawShape(getBuffers().cylinderBuffer, colorPlatter, modelMatrix, viewProjMatrix);
+                popMatrix();
+                
+                pushMatrix();
+                    modelMatrix = mult(modelMatrix, translate(0, 0.27, 0));
+                    modelMatrix = mult(modelMatrix, scalem(3.65, 0.2, 3.65));
+                    drawShape(getBuffers().hollowCylinderBuffer, colorPlatter, modelMatrix, viewProjMatrix);
+                popMatrix();
             popMatrix();
             
             if (getAnimationState().hasRecord) {

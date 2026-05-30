@@ -5,22 +5,7 @@
 
 import { playAudio, stopAudio, getIsPlaying } from '../audio/audio.js';
 
-export const STATE = Object.freeze({
-    IDLE:             0,
-    ARM_LIFT:         1,
-    ARM_PAN_IN:       2,
-    ARM_DROP:         3,
-    PLAYING:          4,
-    ARM_LIFT_STOP:    5,
-    ARM_PAN_OUT:      6,
-    ARM_REST:         7,
-    RECORD_LIFT:      8,
-    RECORD_SWAP:      9,
-    RECORD_PLACE:     10,
-    RECORD_SETTLE:    11,
-});
-
-let animState = STATE.IDLE;
+let animState = 0; 
 let armTiltAngle = 0;   
 let armPanAngle = 0;    
 let cartridgeAngle = 0; 
@@ -47,15 +32,31 @@ export function setOnPlaybackStart(fn) {
     onPlaybackStart = fn;
 }
 
+export function getAnimationState() {
+    return {
+        animState,
+        armTiltAngle,
+        armPanAngle,
+        cartridgeAngle,
+        recordAngle,
+        buttonAngle,
+        hasRecord,
+        recordLiftY,
+        recordSwapX,
+        currentRecord,
+        colorLabels,
+    };
+}
+
 export function startTurntable() {
     if (!hasRecord) return false;
 
-    if (animState === STATE.IDLE || animState === STATE.ARM_PAN_OUT || animState === STATE.ARM_REST) {
-        animState = STATE.ARM_LIFT;
+    if (animState === 0 || animState === 6 || animState === 7) {
+        animState = 1;
         pendingStart = false;
         return true;
     }
-    else if (animState >= STATE.RECORD_LIFT && animState <= STATE.RECORD_SETTLE) {
+    else if (animState >= 8 && animState <= 11) {
         pendingStart = true;
         return true;
     }
@@ -66,11 +67,11 @@ export function startTurntable() {
 export function stopTurntable() {
     pendingStart = false;
 
-    if (animState >= STATE.ARM_LIFT && animState <= STATE.PLAYING) {
-        animState = STATE.ARM_LIFT_STOP;
+    if (animState >= 1 && animState <= 4) {
+        animState = 5;
         return true;
     }
-    else if (animState >= STATE.RECORD_LIFT && animState <= STATE.RECORD_SETTLE) {
+    else if (animState >= 8 && animState <= 11) {
         return true;
     }
 
@@ -87,105 +88,105 @@ export function loadRecord() {
         currentRecord = currentRecord % colorLabels.length;
         recordSwapX = -5.0;
         recordLiftY = 2.0;
-        animState = STATE.RECORD_PLACE;
+        animState = 10;
         return;
     }
 
-    if (animState === STATE.IDLE || animState === STATE.ARM_PAN_OUT || animState === STATE.ARM_REST) {
-        animState = STATE.RECORD_LIFT;
+    if (animState === 0 || animState === 7) {
+        animState = 8;
     }
-    else if (animState === STATE.PLAYING) {
-        animState = STATE.ARM_LIFT_STOP;
+    else if (animState === 4) {
+        animState = 5;
         pendingSwap = true;
     }
-    else if (animState === STATE.ARM_LIFT_STOP || animState === STATE.ARM_PAN_OUT || animState === STATE.ARM_REST) {
+    else if (animState === 5 || animState === 6) {
         pendingSwap = true;
     }
 }
 
 export function updateAnimation(dt) {
-    if (animState === STATE.IDLE) return;
+    if (animState === 0) return;
 
-    else if (animState === STATE.ARM_LIFT) { 
+    else if (animState === 1) { 
         armTiltAngle -= dt * 0.15; 
         if (armTiltAngle <= -0.15) {
             armTiltAngle = -0.15;
-            animState = STATE.ARM_PAN_IN;
+            animState = 2;
         }
     } 
-    else if (animState === STATE.ARM_PAN_IN) { 
+    else if (animState === 2) { 
         armPanAngle -= dt * 0.25; 
         cartridgeAngle -= dt * 0.1; 
         if (armPanAngle <= -0.5) {
             armPanAngle = -0.5;
-            animState = STATE.ARM_DROP;
+            animState = 3;
         }
     } 
-    else if (animState === STATE.ARM_DROP) { 
+    else if (animState === 3) { 
         armTiltAngle += dt * 0.15; 
         if (armTiltAngle >= 0.05) { 
             armTiltAngle = 0.05;
-            animState = STATE.PLAYING;
+            animState = 4;
             if (onPlaybackStart) onPlaybackStart();
         }
     } 
-    else if (animState === STATE.PLAYING) { 
+    else if (animState === 4) { 
         recordAngle += dt * 1.5; 
         buttonAngle += dt * 1.0; 
     }
     
-    else if (animState === STATE.ARM_LIFT_STOP) {
+    else if (animState === 5) {
         armTiltAngle -= dt * 0.15;
         if (armTiltAngle <= -0.15) {
             armTiltAngle = -0.15;
-            animState = STATE.ARM_PAN_OUT;
+            animState = 6;
         }
     }
-    else if (animState === STATE.ARM_PAN_OUT) {
+    else if (animState === 6) {
         armPanAngle    += dt * 0.25;
         cartridgeAngle += dt * 0.1;
         if (armPanAngle >= 0) {
             armPanAngle = 0;
-            animState = STATE.ARM_REST;
+            animState = 7;
         }
     }
-    else if (animState === STATE.ARM_REST) {
+    else if (animState === 7) {
         armTiltAngle += dt * 0.15;
         if (armTiltAngle >= 0) {
             armTiltAngle = 0;
             if (pendingSwap) {
                 pendingSwap = false;
-                animState = STATE.RECORD_LIFT;
+                animState = 8;
             }
         }
     }
 
-    else if (animState === STATE.RECORD_LIFT) {
+    else if (animState === 8) {
         recordLiftY += dt * 1.5;
-        if (recordLiftY >= 2.0) { recordLiftY = 2.0; animState = STATE.RECORD_SWAP; }
+        if (recordLiftY >= 2.0) { recordLiftY = 2.0; animState = 9; }
     }
-    else if (animState === STATE.RECORD_SWAP) {
+    else if (animState === 9) {
         recordSwapX += dt * 3.0;
         if (recordSwapX >= 4.0) {
             recordSwapX = 4.0;
             currentRecord = (currentRecord + 1) % colorLabels.length;
             recordSwapX = -4.0;
-            animState = STATE.RECORD_PLACE;
+            animState = 10;
         }
     }
-    else if (animState === STATE.RECORD_PLACE) {
+    else if (animState === 10) {
         recordSwapX += dt * 3.0;
-        if (recordSwapX >= 0) { recordSwapX = 0; animState = STATE.RECORD_SETTLE; }
+        if (recordSwapX >= 0) { recordSwapX = 0; animState = 11; }
     }
-    else if (animState === STATE.RECORD_SETTLE) {
+    else if (animState === 11) {
         recordLiftY -= dt * 1.5;
         if (recordLiftY <= -0.1) {
             recordLiftY = -0.1;
             if (pendingStart) {
                 pendingStart = false;
-                animState = STATE.PLAYING;
+                animState = 1;
             } else {
-                animState = STATE.IDLE;
+                animState = 0;
             }
         }
     }
@@ -197,32 +198,4 @@ export function getLastTime() {
 
 export function setLastTime(time) {
     lastTime = time;
-}
-
-const _state = {
-    animState: STATE.IDLE,
-    armTiltAngle: 0,
-    armPanAngle: 0,
-    cartridgeAngle: 0,
-    recordAngle: 0,
-    buttonAngle: 0,
-    hasRecord: false,
-    recordLiftY: 0,
-    recordSwapX: 0,
-    currentRecord: 0,
-    colorLabels,
-};
-
-export function getAnimationState() {
-    _state.animState = animState;
-    _state.armTiltAngle = armTiltAngle;
-    _state.armPanAngle = armPanAngle;
-    _state.cartridgeAngle = cartridgeAngle;
-    _state.recordAngle = recordAngle;
-    _state.buttonAngle = buttonAngle;
-    _state.hasRecord = hasRecord;
-    _state.recordLiftY = recordLiftY;
-    _state.recordSwapX = recordSwapX;
-    _state.currentRecord = currentRecord;
-    return _state;
 }

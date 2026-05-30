@@ -1,16 +1,16 @@
-import { playAudio, stopAudio, loadAudio, getIsPlaying } from "../audio/audio.js";
+import { playAudio, stopAudio, loadAudio, setVolume, getIsPlaying } from "../audio/audio.js";
 import { startTurntable, stopTurntable, setOnPlaybackStart, getAnimationState, loadRecord, isPlaybackRequested } from '../animations/animation.js';
 
 const buttonPlay = document.getElementById("button-play");
 const buttonSwap = document.getElementById("button-swap");
 const audioFile= document.getElementById('audio-file');
 const audioStatus = document.getElementById('audio-status');
+const volSlider= document.getElementById('vol-slider');
+const volLabel = document.getElementById('vol-label');
 
 setOnPlaybackStart(() => {
   playAudio();
 });
-
-// buttonPlay.disabled = !getAnimationState().hasRecord;
 
 buttonPlay.addEventListener("click", () => {
   if (isPlaybackRequested()) {
@@ -54,4 +54,10 @@ buttonSwap.addEventListener('click', () => {
   audioFile.click();
   buttonSwap.style.opacity = '0.4';
   setTimeout(() => { buttonSwap.style.opacity = '1'; }, 2200);
+});
+
+volSlider.addEventListener('input', (e) => {
+  const volume = e.target.value / 100;
+  volLabel.textContent = `${e.target.value}%`;
+  setVolume(volume);
 });
