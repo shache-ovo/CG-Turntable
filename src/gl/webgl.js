@@ -3,7 +3,7 @@
  * Handles shader compilation, program creation, buffer management, and drawing
  */
 
-import { createCube, createCylinder, createHollowCylinder, createRoundedBox } from '../geometry/premitives.js';
+import { createCube, createCylinder, createHollowCylinder, createRoundedBox } from '../geometry/primitives.js';
 
 // WebGL context and program
 let gl;
@@ -54,8 +54,7 @@ export function initWebGL(canvas) {
 
     gl.uniform3fv(uniforms.lightDir, [1.0, 0.3, 0.5]);
     gl.uniform3fv(uniforms.lightDir2, [-0.5, 0.8, -0.3]);
-    // gl.uniform3fv(uniforms.lightDir3, [-0.3, -0.2, -1.0]);
-    gl.uniform3fv(uniforms.lightDir3, [-0.5, -0.4, 0.4]);
+    gl.uniform3fv(uniforms.lightDir3, [-0.2, -0.4, 0.4]);
 }
 
 export function setCameraPosition(pos) {
@@ -98,7 +97,7 @@ export function drawShape(bufferInfo, color, modelMatrix, viewProjMatrix, materi
     gl.uniform4fv(uniforms.color, color);
 
     gl.uniform1f(uniforms.shininess, material.shininess ?? 32.0);
-    gl.uniform1f(uniforms.specular, material.specular ?? 1.0);
+    gl.uniform1f(uniforms.specular, material.specular ?? 0.2);
     gl.uniform1f(uniforms.metallic, material.metallic ?? 0.0);
     gl.uniform1f(uniforms.anisotropic, material.anisotropic ?? 0.0);
     gl.uniform1f(uniforms.ambient, material.ambient ?? 0.3);

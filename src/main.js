@@ -38,8 +38,6 @@ function render(time) {
 
     updateAnimation(dt);
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
     const gl = getGLContext();
     gl.viewport(0, 0, canvas.width, canvas.height);
     

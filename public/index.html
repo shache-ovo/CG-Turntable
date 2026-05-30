@@ -85,7 +85,10 @@
 
             // rim: light3, 금속에만 강하게
             float rimSpec = calcSpec(normal, light3, viewDir, u_shininess * 0.5);
-            vec3 rim = specColor * rimSpec * u_specular * u_metallic * 1.5;
+            float rimStrength = mix(0.3, 1.5, u_metallic);
+            vec3 rimColor = mix(vec3(1.0), specColor, u_metallic);
+            vec3 rim = rimColor * rimSpec * u_specular * rimStrength;
+            // vec3 rim = specColor * rimSpec * u_specular * u_metallic * 1.5;
 
             gl_FragColor = vec4(diffuse + specular + rim, u_color.a);
         }

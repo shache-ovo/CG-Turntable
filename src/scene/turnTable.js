@@ -42,7 +42,7 @@ function popMatrix() {
 }
 
 export function renderScene(gl, canvas) {
-    gl.clearColor(0.9, 0.9, 0.9, 1.0); 
+    gl.clearColor(0.8, 0.8, 0.8, 1.0); 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
     let aspect = canvas.width / canvas.height;
@@ -53,8 +53,9 @@ export function renderScene(gl, canvas) {
     view = mult(view, rotateX(deg(0.5))); 
     view = mult(view, rotateY(deg(0))); 
 
-    let invView = inverse(view);
-    setCameraPosition([invView[0][3], invView[1][3], invView[2][3]]);
+    // let invView = inverse(view);
+    // setCameraPosition([invView[3][0], invView[3][1], invView[3][2]]);
+    setCameraPosition([0, 0, 15.0]);
 
     viewProjMatrix = mult(projection, view);
     
@@ -82,6 +83,14 @@ export function renderScene(gl, canvas) {
             modelMatrix = mult(modelMatrix, translate(-0.9, 0.8, 0)); 
             
             pushMatrix();
+                modelMatrix = mult(modelMatrix, translate(0, 0.3, 0));
+                modelMatrix = mult(modelMatrix, scalem(0.07, 0.3, 0.07));
+                drawShape(getBuffers().cylinderBuffer, colorArm, modelMatrix, viewProjMatrix);
+            popMatrix();
+
+            modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().recordAngle)));
+
+            pushMatrix();
                 modelMatrix = mult(modelMatrix, translate(0, 0.1, 0));
                 modelMatrix = mult(modelMatrix, scalem(3.65, 0.07, 3.65));
                 drawShape(getBuffers().cylinderBuffer, colorPlatter, modelMatrix, viewProjMatrix);
@@ -92,12 +101,10 @@ export function renderScene(gl, canvas) {
                 modelMatrix = mult(modelMatrix, scalem(3.65, 0.2, 3.65));
                 drawShape(getBuffers().hollowCylinderBuffer, colorPlatter, modelMatrix, viewProjMatrix);
             popMatrix();
-
             
             if (getAnimationState().hasRecord) {
                 pushMatrix();
                     modelMatrix = mult(modelMatrix, translate(getAnimationState().recordSwapX, getAnimationState().recordLiftY, 0));
-                    modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().recordAngle)));
                     
                     pushMatrix();
                         modelMatrix = mult(modelMatrix, translate(0, 0.45, 0));
