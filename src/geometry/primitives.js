@@ -226,3 +226,29 @@ export function createRoundedBox(width, height, depth, radius, segments) {
 
     return build();
 }
+
+export function createHalfDisk(segments) {
+    const { addVertex, addTri, build } = createGeometryBuilder();
+
+    const topCenter = addVertex(0, 1, 0,  0, 1, 0);
+    const botCenter = addVertex(0, -1, 0, 0, -1, 0);
+
+    const topVerts = [];
+    const botVerts = [];
+
+    for (let i = 0; i <= segments; i++) {
+        const theta = (i / segments) * Math.PI;
+        const cos = Math.cos(theta);
+        const sin = Math.sin(theta);
+
+        topVerts.push(addVertex(cos,  1, sin, 0, 1, 0));
+        botVerts.push(addVertex(cos, -1, sin, 0, -1, 0));
+    }
+
+    for (let i = 0; i < segments; i++) {
+        addTri(topCenter, topVerts[i], topVerts[i + 1]);
+        addTri(botCenter, botVerts[i + 1], botVerts[i]);
+    }
+
+    return build();
+}

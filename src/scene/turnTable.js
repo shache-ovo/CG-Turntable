@@ -22,6 +22,9 @@ const colorArm = [0.9, 0.9, 0.9, 1.0];
 const colorCartridge = [0.95, 0.35, 0.35, 1.0];
 const colorRecordInner = [0.9, 0.9, 0.9, 1.0];
 
+let halfDiskColorA = [1, 0, 0, 1];
+let halfDiskColorB = [0, 0, 1, 1];
+
 const matWood = { shininess: 10.0, specular: 0.1, ambient: 0.15};
 const matRecord = { shininess: 6.0, specular: 0.4, anisotropic: 0.9 };
 const matMetal = { shininess: 20.0, specular: 0.6, ambient: 0.23, metallic: 0.9 };
@@ -39,6 +42,11 @@ function popMatrix() {
     if (matrixStack.length > 0) {
         modelMatrix = matrixStack.pop();
     }
+}
+
+export function randomizeHalfDiskColors() {
+    halfDiskColorA = [Math.random(), Math.random(), Math.random(), 1.0];
+    halfDiskColorB = [Math.random(), Math.random(), Math.random(), 1.0];
 }
 
 export function renderScene(gl, canvas, camera) {
@@ -99,31 +107,45 @@ export function renderScene(gl, canvas, camera) {
                     modelMatrix = mult(modelMatrix, scalem(3.65, 0.2, 3.65));
                     drawShape(getBuffers().hollowCylinderBuffer, colorPlatter, modelMatrix, viewProjMatrix);
                 popMatrix();
-            popMatrix();
             
-            if (getAnimationState().hasRecord) {
-                pushMatrix();
-                    modelMatrix = mult(modelMatrix, translate(getAnimationState().recordSwapX, getAnimationState().recordLiftY, 0));
-                    
+            
+                if (getAnimationState().hasRecord) {
                     pushMatrix();
-                        modelMatrix = mult(modelMatrix, translate(0, 0.45, 0));
-                        modelMatrix = mult(modelMatrix, scalem(3.5, 0.05, 3.5));
-                        drawShape(getBuffers().cylinderBuffer, colorRecord, modelMatrix, viewProjMatrix, matRecord);
-                    popMatrix();
+                        modelMatrix = mult(modelMatrix, translate(getAnimationState().recordSwapX, getAnimationState().recordLiftY, 0));
                         
-                    pushMatrix();
-                        modelMatrix = mult(modelMatrix, translate(0, 0.5, 0));
-                        modelMatrix = mult(modelMatrix, scalem(1, 0.01, 1));
-                        drawShape(getBuffers().cylinderBuffer, getAnimationState().colorLabels[getAnimationState().currentRecord], modelMatrix, viewProjMatrix);
-                    popMatrix();
+                        pushMatrix();
+                            modelMatrix = mult(modelMatrix, translate(0, 0.45, 0));
+                            modelMatrix = mult(modelMatrix, scalem(3.5, 0.05, 3.5));
+                            drawShape(getBuffers().cylinderBuffer, colorRecord, modelMatrix, viewProjMatrix, matRecord);
+                        popMatrix();
+                            
+                        // pushMatrix();
+                        //     modelMatrix = mult(modelMatrix, translate(0, 0.5, 0));
+                        //     modelMatrix = mult(modelMatrix, scalem(1, 0.01, 1));
+                        //     drawShape(getBuffers().cylinderBuffer, getAnimationState().colorLabels[getAnimationState().currentRecord], modelMatrix, viewProjMatrix);
+                        // popMatrix();
 
-                    pushMatrix();
-                        modelMatrix = mult(modelMatrix, translate(0, 0.52, 0));
-                        modelMatrix = mult(modelMatrix, scalem(0.07, 0.01, 0.07));
-                        drawShape(getBuffers().cylinderBuffer, colorRecordInner, modelMatrix, viewProjMatrix, matRecord);
+                        pushMatrix();
+                            modelMatrix = mult(modelMatrix, translate(0, 0.51, 0));
+                            modelMatrix = mult(modelMatrix, scalem(0.9, 0.01, 0.9));
+                            drawShape(getBuffers().halfDiskBuffer, getAnimationState().colorLabels[getAnimationState().currentRecord], modelMatrix, viewProjMatrix);
+                        popMatrix();
+
+                        pushMatrix();
+                            modelMatrix = mult(modelMatrix, translate(0, 0.51, 0));
+                            modelMatrix = mult(modelMatrix, rotateY(180));
+                            modelMatrix = mult(modelMatrix, scalem(0.9, 0.01, 0.9));
+                            drawShape(getBuffers().halfDiskBuffer, getAnimationState().colorLabels[getAnimationState().nextRecord], modelMatrix, viewProjMatrix);
+                        popMatrix();
+
+                        pushMatrix();
+                            modelMatrix = mult(modelMatrix, translate(0, 0.52, 0));
+                            modelMatrix = mult(modelMatrix, scalem(0.07, 0.01, 0.07));
+                            drawShape(getBuffers().cylinderBuffer, colorRecordInner, modelMatrix, viewProjMatrix, matRecord);
+                        popMatrix();
                     popMatrix();
-                popMatrix();
-            }
+                }
+            popMatrix();
         popMatrix();
 
         // --------------------------------------------------

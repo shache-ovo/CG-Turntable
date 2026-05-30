@@ -1,5 +1,6 @@
 import { playAudio, stopAudio, loadAudio, setVolume, getIsPlaying } from "../audio/audio.js";
 import { startTurntable, stopTurntable, setOnPlaybackStart, getAnimationState, loadRecord, isPlaybackRequested } from '../animations/animation.js';
+import { randomizeHalfDiskColors } from './turnTable.js';
 
 const buttonPlay = document.getElementById("button-play");
 const buttonSwap = document.getElementById("button-swap");
@@ -42,6 +43,7 @@ audioFile.addEventListener("change", (e) => {
     .then(() => {
       audioStatus.textContent =
         file.name.length > 18 ? file.name.slice(0, 16) + "…" : file.name;
+      randomizeHalfDiskColors();
       loadRecord();
       buttonPlay.disabled = !getAnimationState().hasRecord;
     })

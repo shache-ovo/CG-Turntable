@@ -12,7 +12,7 @@ const canvas = document.getElementById('glcanvas');
 
 const camera = {
   theta: 0,
-  phi: -0.5,
+  phi: -0.8,
   radius: 15.0,
   isDragging: false,
   lastX: 0,
