@@ -1,5 +1,5 @@
 import { playAudio, stopAudio, loadAudio, setVolume, getIsPlaying } from "../audio/audio.js";
-import { startTurntable, stopTurntable, setOnPlaybackStart, getAnimationState, loadRecord, isPlaybackRequested } from '../animations/animation.js';
+import { startTurntable, stopTurntable, setOnPlaybackStart, getAnimationState, loadRecord, isPlaybackRequested, pressButton, setKnobAngle } from '../animations/animation.js';
 import { randomizeHalfDiskColors } from './turnTable.js';
 
 const buttonPlay = document.getElementById("button-play");
@@ -14,6 +14,7 @@ setOnPlaybackStart(() => {
 });
 
 buttonPlay.addEventListener("click", () => {
+  pressButton(2)
   if (isPlaybackRequested()) {
     stopAudio();
     stopTurntable();
@@ -53,6 +54,7 @@ audioFile.addEventListener("change", (e) => {
 });
 
 buttonSwap.addEventListener('click', () => {
+  pressButton(1);
   audioFile.click();
   buttonSwap.style.opacity = '0.4';
   setTimeout(() => { buttonSwap.style.opacity = '1'; }, 2200);
@@ -62,4 +64,5 @@ volSlider.addEventListener('input', (e) => {
   const volume = e.target.value / 100;
   volLabel.textContent = `${e.target.value}%`;
   setVolume(volume);
+  setKnobAngle(volume * 3.6); 
 });

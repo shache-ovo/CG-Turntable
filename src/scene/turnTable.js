@@ -215,18 +215,22 @@ export function renderScene(gl, canvas, camera) {
                     modelMatrix = mult(modelMatrix, translate(-i*0.8, 0, 0));
                     modelMatrix = mult(modelMatrix, rotateX(deg(Math.PI/2)));
 
-                    if (getAnimationState().animState === 4) {
-                        modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().buttonAngle * (i+1) * 0.5)));
+                    if (i === 0) {
+                        modelMatrix = mult(modelMatrix, rotateY(deg(-getAnimationState().buttonKnobAngle)));
                     }
-
-                    pushMatrix();
-                        modelMatrix = mult(modelMatrix, scalem(0.2, 0.2, 0.2));
-                        drawShape(getBuffers().cylinderBuffer, colorCartridge, modelMatrix, viewProjMatrix);
-                    popMatrix();
-
                     pushMatrix();
                         modelMatrix = mult(modelMatrix, scalem(0.27, 0.27, 0.27));
                         drawShape(getBuffers().husksBuffer, colorCartridge, modelMatrix, viewProjMatrix);
+                    popMatrix();
+
+                    if (i == 1 || i == 2) {
+                        const press = getAnimationState().buttonPressLength[i];
+                        modelMatrix = mult(modelMatrix, translate(0, press, 0));
+                        
+                    }
+                    pushMatrix();
+                        modelMatrix = mult(modelMatrix, scalem(0.2, 0.2, 0.2));
+                        drawShape(getBuffers().cylinderBuffer, colorCartridge, modelMatrix, viewProjMatrix);
                     popMatrix();
 
                 popMatrix();

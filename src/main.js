@@ -38,11 +38,11 @@ window.onload = function() {
         camera.lastY = e.clientY;
     });
 
-    window.addEventListener('mouseup', () => {
+    canvas.addEventListener('mouseup', () => {
         camera.isDragging = false;
     });
 
-    window.addEventListener('mousemove', (e) => {
+    canvas.addEventListener('mousemove', (e) => {
         if (!camera.isDragging) return;
 
         const dx = e.clientX - camera.lastX;
@@ -57,7 +57,7 @@ window.onload = function() {
         camera.phi = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, camera.phi));
     });
 
-    window.addEventListener('wheel', (e) => {
+    canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
         const zoomSensitivity = 0.005;
         camera.radius += e.deltaY * zoomSensitivity;

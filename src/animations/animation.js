@@ -26,7 +26,6 @@ let armTiltAngle = 0;
 let armPanAngle = 0;
 let cartridgeAngle = 0;
 let recordAngle = 0;
-let buttonAngle = 0;
 let lastTime = 0;
 let diskDirection = 1;
 
@@ -38,6 +37,10 @@ let pendingStart = false;
 let recordLiftY = 0;
 let recordSwapX = 0;
 let currentRecord = 0;
+
+let buttonPressLength = [0, 0, 0];
+let buttonPressTarget = [0, 0, 0];
+let buttonKnobAngle = 0;   
 
 const colorLabels = [
     [0.95, 0.45, 0.45, 1.0],
@@ -106,10 +109,6 @@ export function loadRecord() {
         pendingSwap = true;
         stopTurntable()
     }
-    // else if (animState === STATE.PLAYING) {
-    //     pendingSwap = true;
-    //     animState = STATE.PLATTER_BRAKE;
-    // }
     else if (animState >= STATE.ARM_LIFT_STOP && animState <= STATE.ARM_REST) {
         pendingSwap = true;
     }
@@ -117,6 +116,10 @@ export function loadRecord() {
 }
 
 export function updateAnimation(dt) {
+    for (let i = 0; i < 3; i++) {
+        buttonPressLength[i] += (buttonPressTarget[i] - buttonPressLength[i]) * Math.min(dt * 12, 1);
+    }
+
     if (animState === STATE.IDLE) return;
 
     else if (animState === STATE.ARM_LIFT) {
@@ -144,7 +147,6 @@ export function updateAnimation(dt) {
     }
     else if (animState === STATE.PLAYING) {
         recordAngle += dt * 2.5;
-        buttonAngle += dt * 1.0;
     }
 
     else if (animState === STATE.ARM_LIFT_STOP) {
@@ -239,19 +241,29 @@ export function setLastTime(time) {
     lastTime = time;
 }
 
+export function pressButton(index) {
+    buttonPressTarget[index] = -0.1;
+    setTimeout(() => { buttonPressTarget[index] = 0; }, 150);
+}
+
+export function setKnobAngle(angle) {
+    buttonKnobAngle = angle;
+}
+
 const _state = {
     animState: STATE.IDLE,
     armTiltAngle: 0,
     armPanAngle: 0,
     cartridgeAngle: 0,
     recordAngle: 0,
-    buttonAngle: 0,
     hasRecord: false,
     recordLiftY: 0,
     recordSwapX: 0,
     colorLabels,
     currentRecord: 0,
     nextRecord: 1,
+    buttonPressLength: 0,
+    buttonKnobAngle: 0,
 };
 
 export function getAnimationState() {
@@ -260,11 +272,12 @@ export function getAnimationState() {
     _state.armPanAngle   = armPanAngle;
     _state.cartridgeAngle = cartridgeAngle;
     _state.recordAngle   = recordAngle;
-    _state.buttonAngle   = buttonAngle;
     _state.hasRecord     = hasRecord;
     _state.recordLiftY   = recordLiftY;
     _state.recordSwapX   = recordSwapX;
     _state.currentRecord = currentRecord;
     _state.nextRecord = (currentRecord + 1) % colorLabels.length;
+    _state.buttonPressLength = buttonPressLength;
+    _state.buttonKnobAngle  = buttonKnobAngle;
     return _state;
 }
