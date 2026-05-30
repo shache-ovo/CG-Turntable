@@ -1,18 +1,20 @@
-import { playAudio, stopAudio, loadAudio, getIsPlaying } from "../audio/audio.js";
-import { startTurntable, stopTurntable, setOnPlaybackStart, getAnimationState, loadRecord, isPlaybackRequested } from '../animations/animation.js';
+import { playAudio, stopAudio, loadAudio, setVolume, getIsPlaying } from "../audio/audio.js";
+import { startTurntable, stopTurntable, setOnPlaybackStart, getAnimationState, loadRecord, isPlaybackRequested, pressButton, setKnobAngle } from '../animations/animation.js';
+import { randomizeHalfDiskColors } from './turnTable.js';
 
 const buttonPlay = document.getElementById("button-play");
 const buttonSwap = document.getElementById("button-swap");
 const audioFile= document.getElementById('audio-file');
 const audioStatus = document.getElementById('audio-status');
+const volSlider= document.getElementById('vol-slider');
+const volLabel = document.getElementById('vol-label');
 
 setOnPlaybackStart(() => {
   playAudio();
 });
 
-// buttonPlay.disabled = !getAnimationState().hasRecord;
-
 buttonPlay.addEventListener("click", () => {
+  pressButton(2)
   if (isPlaybackRequested()) {
     stopAudio();
     stopTurntable();
@@ -42,6 +44,7 @@ audioFile.addEventListener("change", (e) => {
     .then(() => {
       audioStatus.textContent =
         file.name.length > 18 ? file.name.slice(0, 16) + "…" : file.name;
+      randomizeHalfDiskColors();
       loadRecord();
       buttonPlay.disabled = !getAnimationState().hasRecord;
     })
@@ -51,7 +54,15 @@ audioFile.addEventListener("change", (e) => {
 });
 
 buttonSwap.addEventListener('click', () => {
+  pressButton(1);
   audioFile.click();
   buttonSwap.style.opacity = '0.4';
   setTimeout(() => { buttonSwap.style.opacity = '1'; }, 2200);
+});
+
+volSlider.addEventListener('input', (e) => {
+  const volume = e.target.value / 100;
+  volLabel.textContent = `${e.target.value}%`;
+  setVolume(volume);
+  setKnobAngle(volume * 3.6); 
 });

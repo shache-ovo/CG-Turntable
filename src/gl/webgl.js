@@ -3,7 +3,7 @@
  * Handles shader compilation, program creation, buffer management, and drawing
  */
 
-import { createCube, createCylinder, createHollowCylinder, createRoundedBox } from '../geometry/premitives.js';
+import { createCube, createCylinder, createHollowCylinder, createRoundedBox, createHalfDisk } from '../geometry/primitives.js';
 
 // WebGL context and program
 let gl;
@@ -15,6 +15,7 @@ let cylinderBuffer;
 let hollowCylinderBuffer;
 let husksBuffer;
 let roundedCubeBuffer;
+let halfDiskBuffer;
 
 export function initWebGL(canvas) {
     gl = canvas.getContext('webgl');
@@ -51,11 +52,11 @@ export function initWebGL(canvas) {
     hollowCylinderBuffer = createBufferInfo(createHollowCylinder(36, 0.03, 1, 1));
     husksBuffer = createBufferInfo(createHollowCylinder(7, 0.2, 1, 1));
     roundedCubeBuffer = createBufferInfo(createRoundedBox(2, 2, 2, 0.1, 10));
+    halfDiskBuffer = createBufferInfo(createHalfDisk(36));
 
     gl.uniform3fv(uniforms.lightDir, [1.0, 0.3, 0.5]);
     gl.uniform3fv(uniforms.lightDir2, [-0.5, 0.8, -0.3]);
-    // gl.uniform3fv(uniforms.lightDir3, [-0.3, -0.2, -1.0]);
-    gl.uniform3fv(uniforms.lightDir3, [-0.5, -0.4, 0.4]);
+    gl.uniform3fv(uniforms.lightDir3, [-0.2, -0.4, 0.4]);
 }
 
 export function setCameraPosition(pos) {
@@ -98,7 +99,7 @@ export function drawShape(bufferInfo, color, modelMatrix, viewProjMatrix, materi
     gl.uniform4fv(uniforms.color, color);
 
     gl.uniform1f(uniforms.shininess, material.shininess ?? 32.0);
-    gl.uniform1f(uniforms.specular, material.specular ?? 1.0);
+    gl.uniform1f(uniforms.specular, material.specular ?? 0.2);
     gl.uniform1f(uniforms.metallic, material.metallic ?? 0.0);
     gl.uniform1f(uniforms.anisotropic, material.anisotropic ?? 0.0);
     gl.uniform1f(uniforms.ambient, material.ambient ?? 0.3);
@@ -115,5 +116,5 @@ export function getGLContext() {
 }
 
 export function getBuffers() {
-    return { cubeBuffer, cylinderBuffer, hollowCylinderBuffer, husksBuffer, roundedCubeBuffer };
+    return { cubeBuffer, cylinderBuffer, hollowCylinderBuffer, husksBuffer, roundedCubeBuffer, halfDiskBuffer };
 }
