@@ -103,7 +103,7 @@ export function loadRecord() {
 
     if (animState === STATE.IDLE) {
         animState = STATE.RECORD_LIFT
-        diskDirection = 1;
+        // diskDirection = 1;
     }
     else if (animState >= STATE.ARM_LIFT && animState <= STATE.PLAYING) {
         pendingSwap = true;
@@ -206,11 +206,17 @@ export function updateAnimation(dt) {
         if (recordLiftY >= 2.0) { recordLiftY = 2.0; animState = STATE.RECORD_SWAP; }
     }
     else if (animState === STATE.RECORD_SWAP) {
-        recordSwapX += (dt * 3.0) * diskDirection;
-        const threshold = 4.0 * diskDirection;
-        if (recordSwapX >= threshold) {
-            recordSwapX = threshold;
+        recordSwapX += dt * 3.0 * diskDirection;
+        const threshold = 4.0;
+
+        const passed = diskDirection === 1
+            ? recordSwapX >= threshold
+            : recordSwapX <= -threshold;
+
+        if (passed) {
             currentRecord = (currentRecord + 1) % colorLabels.length;
+            recordAngle = 0;
+            diskDirection = 1;
             recordSwapX = -threshold;
             animState = STATE.RECORD_PLACE;
         }

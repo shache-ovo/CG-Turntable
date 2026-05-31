@@ -70,40 +70,44 @@ export function renderScene(gl, canvas, camera) {
     
     // HIERARCHY LEVEL 1: ROOT
     pushMatrix();
-    
+
+        // --------------------------------------------------
+        // BASE BRANCH
+        // --------------------------------------------------
         pushMatrix();
             modelMatrix = mult(modelMatrix, scalem(5, 0.8, 4));
             drawShape(getBuffers().roundedCubeBuffer, colorBase, modelMatrix, viewProjMatrix);
+            
+            pushMatrix();
+                modelMatrix = mult(modelMatrix, translate(0, -0.9, 0));
+                modelMatrix = mult(modelMatrix, scalem(1.1, 0.125, 1.1));
+                drawShape(getBuffers().roundedCubeBuffer, colorWood, modelMatrix, viewProjMatrix, matWood);
+            popMatrix();
+
         popMatrix();
         
-        pushMatrix();
-            modelMatrix = mult(modelMatrix, translate(0, -0.9, 0));
-            modelMatrix = mult(modelMatrix, scalem(5.5, 0.1, 4.4));
-            drawShape(getBuffers().roundedCubeBuffer, colorWood, modelMatrix, viewProjMatrix, matWood);
-        popMatrix();
-
         // --------------------------------------------------
         // PLATTER & RECORD BRANCH
         // --------------------------------------------------
         pushMatrix();
-            modelMatrix = mult(modelMatrix, translate(-0.9, 0.8, 0)); 
+            modelMatrix = mult(modelMatrix, translate(-0.9, 1.1, 0)); 
             
             pushMatrix();
-                modelMatrix = mult(modelMatrix, translate(0, 0.3, 0));
+                // modelMatrix = mult(modelMatrix, translate(0, 0.3, 0));
                 modelMatrix = mult(modelMatrix, scalem(0.07, 0.3, 0.07));
                 drawShape(getBuffers().cylinderBuffer, colorArm, modelMatrix, viewProjMatrix);
             popMatrix();
 
             pushMatrix();
                 modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().recordAngle)));
+                modelMatrix = mult(modelMatrix, translate(0, -0.2, 0));
                 pushMatrix();
-                    modelMatrix = mult(modelMatrix, translate(0, 0.1, 0));
                     modelMatrix = mult(modelMatrix, scalem(3.65, 0.07, 3.65));
                     drawShape(getBuffers().cylinderBuffer, colorPlatter, modelMatrix, viewProjMatrix);
                 popMatrix();
                 
                 pushMatrix();
-                    modelMatrix = mult(modelMatrix, translate(0, 0.27, 0));
+                    modelMatrix = mult(modelMatrix, translate(0, 0.17, 0));
                     modelMatrix = mult(modelMatrix, scalem(3.65, 0.2, 3.65));
                     drawShape(getBuffers().hollowCylinderBuffer, colorPlatter, modelMatrix, viewProjMatrix);
                 popMatrix();
@@ -112,34 +116,27 @@ export function renderScene(gl, canvas, camera) {
                 if (getAnimationState().hasRecord) {
                     pushMatrix();
                         modelMatrix = mult(modelMatrix, translate(getAnimationState().recordSwapX, getAnimationState().recordLiftY, 0));
+                        modelMatrix = mult(modelMatrix, translate(0, 0.25, 0));
                         
                         pushMatrix();
-                            modelMatrix = mult(modelMatrix, translate(0, 0.45, 0));
                             modelMatrix = mult(modelMatrix, scalem(3.5, 0.05, 3.5));
                             drawShape(getBuffers().cylinderBuffer, colorRecord, modelMatrix, viewProjMatrix, matRecord);
                         popMatrix();
-                            
-                        // pushMatrix();
-                        //     modelMatrix = mult(modelMatrix, translate(0, 0.5, 0));
-                        //     modelMatrix = mult(modelMatrix, scalem(1, 0.01, 1));
-                        //     drawShape(getBuffers().cylinderBuffer, getAnimationState().colorLabels[getAnimationState().currentRecord], modelMatrix, viewProjMatrix);
-                        // popMatrix();
 
+                        modelMatrix = mult(modelMatrix, translate(0, 0.05, 0));
                         pushMatrix();
-                            modelMatrix = mult(modelMatrix, translate(0, 0.51, 0));
-                            modelMatrix = mult(modelMatrix, scalem(0.9, 0.01, 0.9));
-                            drawShape(getBuffers().halfDiskBuffer, getAnimationState().colorLabels[getAnimationState().currentRecord], modelMatrix, viewProjMatrix);
+                        modelMatrix = mult(modelMatrix, scalem(0.9, 0.01, 0.9));
+                        drawShape(getBuffers().halfDiskBuffer, getAnimationState().colorLabels[getAnimationState().currentRecord], modelMatrix, viewProjMatrix);
                         popMatrix();
-
+                        
                         pushMatrix();
-                            modelMatrix = mult(modelMatrix, translate(0, 0.51, 0));
-                            modelMatrix = mult(modelMatrix, rotateY(180));
-                            modelMatrix = mult(modelMatrix, scalem(0.9, 0.01, 0.9));
-                            drawShape(getBuffers().halfDiskBuffer, getAnimationState().colorLabels[getAnimationState().nextRecord], modelMatrix, viewProjMatrix);
+                        modelMatrix = mult(modelMatrix, rotateY(180));
+                        modelMatrix = mult(modelMatrix, scalem(0.9, 0.01, 0.9));
+                        drawShape(getBuffers().halfDiskBuffer, getAnimationState().colorLabels[getAnimationState().nextRecord], modelMatrix, viewProjMatrix);
                         popMatrix();
-
+                        
                         pushMatrix();
-                            modelMatrix = mult(modelMatrix, translate(0, 0.52, 0));
+                            modelMatrix = mult(modelMatrix, translate(0, 0.01, 0));
                             modelMatrix = mult(modelMatrix, scalem(0.07, 0.01, 0.07));
                             drawShape(getBuffers().cylinderBuffer, colorRecordInner, modelMatrix, viewProjMatrix, matRecord);
                         popMatrix();
@@ -149,7 +146,7 @@ export function renderScene(gl, canvas, camera) {
         popMatrix();
 
         // --------------------------------------------------
-        // HIERARCHY LEVEL 2: TONEARM MECHANISM 
+        // TONEARM MECHANISM 
         // --------------------------------------------------
         pushMatrix();
             modelMatrix = mult(modelMatrix, translate(3.8, 0.8, -2.5));
@@ -161,7 +158,7 @@ export function renderScene(gl, canvas, camera) {
                 drawShape(getBuffers().cylinderBuffer, colorArm, modelMatrix, viewProjMatrix, matMetal);
             popMatrix();
 
-            // HIERARCHY LEVEL 3: TONEARM PIVOT
+            // TONEARM PIVOT
             modelMatrix = mult(modelMatrix, translate(0, 0.6, 0));
             modelMatrix = mult(modelMatrix, rotateY(deg(getAnimationState().armPanAngle)));
 
@@ -170,7 +167,7 @@ export function renderScene(gl, canvas, camera) {
                 drawShape(getBuffers().cylinderBuffer, colorCartridge, modelMatrix, viewProjMatrix);
             popMatrix();
 
-            // HIERARCHY LEVEL 4: TONEARM TUBE 
+            // TONEARM TUBE 
             modelMatrix = mult(modelMatrix, translate(0, 0.3, 0));
             modelMatrix = mult(modelMatrix, rotateX(deg(getAnimationState().armTiltAngle)));
 
@@ -181,23 +178,19 @@ export function renderScene(gl, canvas, camera) {
                 drawShape(getBuffers().cylinderBuffer, colorArm, modelMatrix, viewProjMatrix, matMetal);
             popMatrix();
 
-            // --------------------------------------------------
-            // HIERARCHY LEVEL 5: CARTRIDGE & STYLUS
-            // --------------------------------------------------
+            // CARTRIDGE & STYLUS
             pushMatrix();
-                modelMatrix = mult(modelMatrix, translate(0, 0.0, 3.6));
-                
+                modelMatrix = mult(modelMatrix, translate(-0.15, 0.0, 3.7));
                 modelMatrix = mult(modelMatrix, rotateY(deg(-0.6 + getAnimationState().cartridgeAngle))); 
                 
                 pushMatrix();
-                    modelMatrix = mult(modelMatrix, translate(-0.15, 0.0, 0.1));
                     modelMatrix = mult(modelMatrix, scalem(0.25, 0.18, 0.4));
                     drawShape(getBuffers().cubeBuffer, colorCartridge, modelMatrix, viewProjMatrix);
                 popMatrix();
                 
-                // 바늘 (stylus)
+                // stylus
                 pushMatrix();
-                    modelMatrix = mult(modelMatrix, translate(-0.2, -0.2, 0.3));
+                    modelMatrix = mult(modelMatrix, translate(-0.05, -0.2, 0.2));
                     modelMatrix = mult(modelMatrix, scalem(0.02, 0.15, 0.02));
                     drawShape(getBuffers().cylinderBuffer, colorArm, modelMatrix, viewProjMatrix);
                 popMatrix();
